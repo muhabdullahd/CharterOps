@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase, Alert, Flight } from '@/lib/supabase'
+import { supabase, Alert } from '@/lib/supabase'
 
 export default function AlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>([])
