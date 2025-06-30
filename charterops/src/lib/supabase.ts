@@ -74,6 +74,7 @@ export interface Backup {
   aircraft_id: string
   fallback_airport: string
   activated: boolean
+  priority?: number
   created_at: string
   updated_at: string
 } 
