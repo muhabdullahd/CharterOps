@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase, Crew } from '@/lib/supabase'
-import { Users, CheckCircle } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
 
 export default function CrewPage() {
   const [crew, setCrew] = useState<Crew[]>([])

@@ -48,3 +48,6 @@ next-env.d.ts
 venv/
 __pycache__/
 *.pyc
+
+# presentation materials (private business documents)
+presentation-materials/
