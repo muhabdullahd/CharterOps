@@ -37,7 +37,7 @@ export default function FlightsPage() {
           <table className="min-w-full bg-white">
             <thead>
               <tr>
-                <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Flight Number</th>
+                <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Flight ID</th>
                 <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Tail Number</th>
                 <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Origin</th>
                 <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Destination</th>
@@ -53,7 +53,7 @@ export default function FlightsPage() {
               ) : (
                 activeFlights.map((flight: Flight) => (
                   <tr key={flight.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 border-b text-gray-900 font-medium">{flight.flight_number}</td>
+                    <td className="px-6 py-4 border-b text-gray-900 font-medium">{flight.id}</td>
                     <td className="px-6 py-4 border-b text-gray-700">{flight.tail_number}</td>
                     <td className="px-6 py-4 border-b text-gray-700">{flight.origin}</td>
                     <td className="px-6 py-4 border-b text-gray-700">{flight.destination}</td>
