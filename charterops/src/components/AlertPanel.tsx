@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Alert } from '@/lib/supabase'
 import { AlertTriangle, X, Clock, Cloud, Users, Wrench, MapPin } from 'lucide-react'
 import { format } from 'date-fns'
+import { useRouter } from 'next/navigation'
 
 interface AlertPanelProps {
   alerts: Alert[]
@@ -11,6 +12,8 @@ interface AlertPanelProps {
 
 export default function AlertPanel({ alerts }: AlertPanelProps) {
   const [expandedAlert, setExpandedAlert] = useState<string | null>(null)
+  const [resolving, setResolving] = useState<string | null>(null)
+  const router = useRouter()
 
   const getAlertIcon = (type: string) => {
     switch (type) {
@@ -55,6 +58,33 @@ export default function AlertPanel({ alerts }: AlertPanelProps) {
       default:
         return 'text-gray-800'
     }
+  }
+
+  const handleMarkResolved = async (alertId: string) => {
+    setResolving(alertId)
+    try {
+      const res = await fetch('/api/monitor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'resolve_alert', alert_id: alertId })
+      })
+      if (res.ok) {
+        // Close the expanded alert
+        setExpandedAlert(null)
+        // The parent component will refresh the alerts list
+        // You could also add a callback prop to refresh the alerts
+      } else {
+        console.error('Failed to resolve alert')
+      }
+    } catch (error) {
+      console.error('Error resolving alert:', error)
+    } finally {
+      setResolving(null)
+    }
+  }
+
+  const handleViewFlight = (flightId: string) => {
+    router.push(`/dashboard/flights?flight_id=${flightId}`)
   }
 
   return (
@@ -119,10 +149,17 @@ export default function AlertPanel({ alerts }: AlertPanelProps) {
                       <p><strong>Status:</strong> {alert.resolved ? 'Resolved' : 'Active'}</p>
                     </div>
                     <div className="mt-3 flex space-x-2">
-                      <button className="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">
-                        Mark Resolved
+                      <button 
+                        className="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700 disabled:opacity-50"
+                        disabled={resolving === alert.id}
+                        onClick={() => handleMarkResolved(alert.id)}
+                      >
+                        {resolving === alert.id ? 'Resolving...' : 'Mark Resolved'}
                       </button>
-                      <button className="bg-gray-600 text-white px-3 py-1 rounded text-xs hover:bg-gray-700">
+                      <button 
+                        className="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700"
+                        onClick={() => handleViewFlight(alert.flight_id)}
+                      >
                         View Flight
                       </button>
                     </div>
