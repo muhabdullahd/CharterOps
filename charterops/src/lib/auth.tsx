@@ -43,7 +43,7 @@ export default function AuthForm() {
           appearance={{ theme: ThemeSupa }}
           theme="default"
           providers={[]}
-          redirectTo={typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : '/dashboard'}
+          redirectTo="https://charterops.vercel.app/dashboard"
         />
       </div>
     </div>
