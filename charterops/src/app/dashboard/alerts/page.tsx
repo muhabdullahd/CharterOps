@@ -7,7 +7,7 @@ import MaintenanceDispatchModal from '@/components/MaintenanceDispatchModal'
 import FlightRerouteModal from '@/components/FlightRerouteModal'
 import WeatherInfoModal from '@/components/WeatherInfoModal'
 import BackupCrewModal from '@/components/BackupCrewModal'
-import { CheckCircle, AlertTriangle } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
 
 export default function AlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>([])
@@ -217,7 +217,7 @@ export default function AlertsPage() {
                     <div className="flex flex-col items-center justify-center gap-2">
                       <CheckCircle className="h-10 w-10 text-green-300 mb-2 animate-bounce" />
                       <span className="text-lg font-semibold">No active alerts. All clear!</span>
-                      <span className="text-sm text-gray-400">You're all caught up. Enjoy the calm skies.</span>
+                      <span className="text-sm text-gray-400">You&apos;re all caught up. Enjoy the calm skies.</span>
                     </div>
                   </td>
                 </tr>
