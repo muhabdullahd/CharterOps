@@ -11,11 +11,11 @@ export default function FlightsPageContent() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const status = searchParams.get("status");
 
   useEffect(() => {
     const fetchFlights = async () => {
       let query = supabase.from("flights").select("*").order("departure_time", { ascending: true });
-      const status = searchParams.get("status");
       if (status) {
         query = query.eq("status", status);
       }
@@ -24,8 +24,7 @@ export default function FlightsPageContent() {
       setLoading(false);
     };
     fetchFlights();
-    // Only depend on searchParams.toString() to avoid useEffect warning
-  }, [searchParams.toString()]);
+  }, [status]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
