@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase, Flight, Alert, Crew } from '@/lib/supabase'
+import { Plane, CheckCircle } from 'lucide-react'
 
 interface FlightDetails {
   flight: Flight
@@ -277,50 +278,48 @@ export default function FlightsPage() {
 
   // Only show flights list if not loading and no flight_id
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-5xl mx-auto">
         <button
-          className="mb-8 px-6 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
+          className="mb-8 px-6 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
           onClick={() => router.push('/dashboard')}
+          aria-label="Back to Dashboard"
         >
           Back to Dashboard
         </button>
-        <h2 className="text-2xl font-bold mb-6 text-center">Active Flights</h2>
+        <h1 className="text-3xl font-bold mb-8 text-center tracking-tight">Flights</h1>
         <div className="overflow-x-auto rounded-lg shadow border border-gray-200">
           <table className="min-w-full bg-white">
             <thead>
               <tr>
-                <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Flight ID</th>
-                <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Tail Number</th>
+                <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Flight</th>
                 <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Origin</th>
                 <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Destination</th>
-                <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Departure Time</th>
+                <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Departure</th>
                 <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Status</th>
-                <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={7} className="px-6 py-4 text-center text-gray-500">Loading...</td></tr>
-              ) : activeFlights.length === 0 ? (
-                <tr><td colSpan={7} className="px-6 py-4 text-center text-gray-500">No active flights.</td></tr>
+                <tr><td colSpan={5} className="px-6 py-4 text-center text-gray-500">Loading...</td></tr>
+              ) : flights.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <CheckCircle className="h-10 w-10 text-green-300 mb-2 animate-bounce" />
+                      <span className="text-lg font-semibold">No flights found.</span>
+                      <span className="text-sm text-gray-400">Try adding a new flight.</span>
+                    </div>
+                  </td>
+                </tr>
               ) : (
-                activeFlights.map((flight: Flight) => (
-                  <tr key={flight.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 border-b text-gray-900 font-medium">{flight.id}</td>
-                    <td className="px-6 py-4 border-b text-gray-700">{flight.tail_number}</td>
+                flights.map((flight, idx) => (
+                  <tr key={flight.id} className={`transition-colors duration-150 ${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-blue-50`}>
+                    <td className="px-6 py-4 border-b text-gray-900 font-medium">{flight.tail_number}</td>
                     <td className="px-6 py-4 border-b text-gray-700">{flight.origin}</td>
                     <td className="px-6 py-4 border-b text-gray-700">{flight.destination}</td>
                     <td className="px-6 py-4 border-b text-gray-700">{new Date(flight.departure_time).toLocaleString()}</td>
                     <td className="px-6 py-4 border-b text-gray-700">{flight.status}</td>
-                    <td className="px-6 py-4 border-b text-gray-700">
-                      <button
-                        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-                        onClick={() => router.push(`/dashboard/flights?flight_id=${flight.id}`)}
-                      >
-                        View Details
-                      </button>
-                    </td>
                   </tr>
                 ))
               )}
