@@ -223,8 +223,6 @@ export class DisruptionDetector {
       let severity: 'low' | 'medium' | 'high' | 'critical' = 'low'
 
       // Check for airport curfews (simplified - in real implementation, this would check NOTAMs)
-      const currentHour = new Date().getHours()
-      
       // Example curfew checks (these would come from NOTAM data)
       const curfewAirports = {
         'KTEB': { start: 23, end: 6 }, // Teterboro curfew
