@@ -348,7 +348,15 @@ export default function Dashboard() {
                 <div className="p-4">
                   <div className="space-y-3">
                     {disruptionSummary.slice(0, 5).map((summary) => (
-                      <div key={summary.flight_id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div
+                        key={summary.flight_id}
+                        className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-100 transition"
+                        onClick={() => router.push(`/dashboard/flights?flight_id=${summary.flight_id}`)}
+                        tabIndex={0}
+                        role="button"
+                        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') router.push(`/dashboard/flights?flight_id=${summary.flight_id}`) }}
+                        aria-label={`Go to flight ${summary.tail_number}`}
+                      >
                         <div className="flex-1">
                           <div className="flex items-center space-x-2">
                             <span className="font-medium">{summary.tail_number}</span>
