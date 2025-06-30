@@ -43,7 +43,7 @@ export default function AuthForm() {
           appearance={{ theme: ThemeSupa }}
           theme="dark"
           providers={[]}
-          redirectTo={`${window.location.origin}/dashboard`}
+          redirectTo={typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : '/dashboard'}
         />
       </div>
     </div>

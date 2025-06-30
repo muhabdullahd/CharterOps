@@ -122,7 +122,7 @@ export default function AlertsPage() {
       })
       if (res.ok) {
         setAlerts(alerts => alerts.filter(a => a.id !== alertId))
-        setToast(`Maintenance crew dispatched!`)
+        setToast(`Maintenance crew ${crewId} dispatched!`)
         setTimeout(() => setToast(null), 2000)
       } else {
         setToast('Failed to dispatch maintenance')
