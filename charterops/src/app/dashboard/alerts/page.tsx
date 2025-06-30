@@ -338,7 +338,6 @@ export default function AlertsPage() {
       {/* Modals */}
       <MaintenanceDispatchModal
         alertId={maintenanceModal.alertId}
-        flightId={maintenanceModal.flightId}
         isOpen={maintenanceModal.isOpen}
         onClose={() => setMaintenanceModal({ isOpen: false, alertId: '', flightId: '' })}
         onDispatch={handleMaintenanceDispatch}
@@ -346,7 +345,6 @@ export default function AlertsPage() {
       
       <FlightRerouteModal
         alertId={rerouteModal.alertId}
-        flightId={rerouteModal.flightId}
         currentOrigin={rerouteModal.origin}
         currentDestination={rerouteModal.destination}
         isOpen={rerouteModal.isOpen}
@@ -355,8 +353,6 @@ export default function AlertsPage() {
       />
       
       <WeatherInfoModal
-        alertId={weatherModal.alertId}
-        flightId={weatherModal.flightId}
         origin={weatherModal.origin}
         destination={weatherModal.destination}
         isOpen={weatherModal.isOpen}
@@ -365,7 +361,6 @@ export default function AlertsPage() {
       
       <BackupCrewModal
         alertId={crewModal.alertId}
-        flightId={crewModal.flightId}
         isOpen={crewModal.isOpen}
         onClose={() => setCrewModal({ isOpen: false, alertId: '', flightId: '' })}
         onAssign={handleBackupCrewAssign}

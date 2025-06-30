@@ -1,12 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Users, Clock, CheckCircle, AlertTriangle, UserPlus } from 'lucide-react'
+import { X, Users, Clock, CheckCircle, AlertTriangle } from 'lucide-react'
 import { supabase, Crew } from '@/lib/supabase'
 
 interface BackupCrewModalProps {
   alertId: string
-  flightId: string
   isOpen: boolean
   onClose: () => void
   onAssign: (alertId: string, crewIds: string[]) => void
@@ -14,7 +13,6 @@ interface BackupCrewModalProps {
 
 export default function BackupCrewModal({ 
   alertId, 
-  flightId, 
   isOpen, 
   onClose, 
   onAssign 

@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react'
 import { X, Cloud, Wind, Eye, Thermometer, AlertTriangle, CheckCircle } from 'lucide-react'
 
 interface WeatherInfoModalProps {
-  alertId: string
-  flightId: string
   origin: string
   destination: string
   isOpen: boolean
@@ -25,8 +23,6 @@ interface WeatherData {
 }
 
 export default function WeatherInfoModal({ 
-  alertId, 
-  flightId, 
   origin, 
   destination, 
   isOpen, 

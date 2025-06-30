@@ -6,7 +6,6 @@ import { supabase, Crew } from '@/lib/supabase'
 
 interface MaintenanceDispatchModalProps {
   alertId: string
-  flightId: string
   isOpen: boolean
   onClose: () => void
   onDispatch: (alertId: string, crewId: string) => void
@@ -14,7 +13,6 @@ interface MaintenanceDispatchModalProps {
 
 export default function MaintenanceDispatchModal({ 
   alertId, 
-  flightId, 
   isOpen, 
   onClose, 
   onDispatch 

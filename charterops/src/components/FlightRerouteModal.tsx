@@ -1,11 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { X, MapPin, Plane, Clock, AlertTriangle } from 'lucide-react'
+import { X, MapPin, Plane, AlertTriangle } from 'lucide-react'
 
 interface FlightRerouteModalProps {
   alertId: string
-  flightId: string
   currentOrigin: string
   currentDestination: string
   isOpen: boolean
@@ -15,7 +14,6 @@ interface FlightRerouteModalProps {
 
 export default function FlightRerouteModal({ 
   alertId, 
-  flightId, 
   currentOrigin, 
   currentDestination, 
   isOpen, 
