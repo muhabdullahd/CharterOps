@@ -41,7 +41,7 @@ export class CrewComplianceEngine {
     MAX_DUTY_HOURS_PER_WEEK: 60
   }
 
-  async calculateCrewDuty(crewId: string, flightId: string): Promise<number> {
+  async calculateCrewDuty(crewId: string): Promise<number> {
     try {
       // Get all duty records for this crew member in the last 24 hours
       const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
@@ -100,7 +100,7 @@ export class CrewComplianceEngine {
 
   async performComplianceCheck(crewId: string): Promise<ComplianceCheck> {
     try {
-      const currentDutyHours = await this.calculateCrewDuty(crewId, '')
+      const currentDutyHours = await this.calculateCrewDuty(crewId)
       const restCompliant = await this.checkRestCompliance(crewId)
       
       const violations: string[] = []
