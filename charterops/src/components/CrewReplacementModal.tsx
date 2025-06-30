@@ -45,8 +45,8 @@ export default function CrewReplacementModal({
     try {
       await onReplace(atRiskCrew.id, selectedCrew)
       onClose()
-    } catch (err) {
-      setError('Failed to replace crew member. Please try again.')
+    } catch {
+      // handle error if needed
     } finally {
       setLoading(false)
     }

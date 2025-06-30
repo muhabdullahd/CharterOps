@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { DisruptionPrediction, PredictionFactor } from '@/lib/hybrid-ai-engine'
-import { AlertTriangle, TrendingUp, Clock, Target, CheckCircle, XCircle, AlertCircle, Info, Brain, Zap, Cloud } from 'lucide-react'
+import { DisruptionPrediction } from '@/lib/hybrid-ai-engine'
+import { AlertTriangle, Target, CheckCircle, XCircle, AlertCircle, Info, Brain, Zap, Cloud } from 'lucide-react'
 import { format } from 'date-fns'
 import { getWeatherSourceInfo } from '@/lib/weather-config'
 
@@ -181,7 +181,9 @@ export default function PredictiveAnalysisPanel({ flightId, showAllFlights = fal
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
                         <span className="text-sm font-medium">
-                          Flight {prediction.flight_id.slice(0, 8)}
+                          {('origin' in prediction && 'destination' in prediction && prediction.origin && prediction.destination)
+                            ? `Flight ${prediction.origin} to ${prediction.destination}`
+                            : `Flight ${prediction.flight_id.slice(0, 8)}`}
                         </span>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskLevelColor(prediction.risk_level)}`}>
                           {prediction.risk_level.toUpperCase()}

@@ -1,12 +1,14 @@
 import * as tf from '@tensorflow/tfjs'
 import { supabase } from './supabase'
-import { Flight, Alert, Crew } from './supabase'
+import { Flight } from './supabase'
 import { WeatherAPI } from './weather-api'
 
-// Use globalThis to persist the model across hot reloads and API calls
-const globalAny = globalThis as any;
-if (!globalAny.hybridAIModel) {
-  globalAny.hybridAIModel = null;
+interface HybridAIGlobal extends Global {
+  hybridAIModel?: tf.LayersModel | null;
+}
+const globalTyped = globalThis as HybridAIGlobal;
+if (!globalTyped.hybridAIModel) {
+  globalTyped.hybridAIModel = null;
 }
 
 export interface DisruptionPrediction {
@@ -101,7 +103,7 @@ export class HybridAIEngine {
   }
 
   private async createModel(): Promise<tf.LayersModel> {
-    if (globalAny.hybridAIModel) return globalAny.hybridAIModel;
+    if (globalTyped.hybridAIModel) return globalTyped.hybridAIModel;
     const model = tf.sequential({
       layers: [
         tf.layers.dense({
@@ -132,7 +134,7 @@ export class HybridAIEngine {
       loss: 'binaryCrossentropy',
       metrics: ['accuracy']
     })
-    globalAny.hybridAIModel = model;
+    globalTyped.hybridAIModel = model;
     return model;
   }
 
@@ -229,7 +231,7 @@ export class HybridAIEngine {
       
       const aiPrediction = await this.getAIPrediction(featureArray)
       const featureImportance = await this.calculateFeatureImportance(featureArray, aiPrediction)
-      const factors = this.calculateFactors(features, featureImportance, aiPrediction)
+      const factors = this.calculateFactors(features, featureImportance)
       const explanation = this.generateExplanation(features, aiPrediction, factors)
       
       const riskLevel = this.determineRiskLevel(aiPrediction)
@@ -244,7 +246,7 @@ export class HybridAIEngine {
         confidence: confidence,
         factors: factors,
         predicted_time: this.predictDisruptionTime(flight, aiPrediction),
-        recommended_actions: this.generateRecommendations(features, aiPrediction, factors),
+        recommended_actions: this.generateRecommendations(features),
         ai_model_version: 'hybrid-v1.0.0',
         feature_importance: featureImportance,
         model_confidence: confidence,
@@ -294,14 +296,6 @@ export class HybridAIEngine {
       // Get weather for both origin and destination airports
       const originWeather = await weatherAPI.getWeatherForAirport(flight.origin)
       const destinationWeather = await weatherAPI.getWeatherForAirport(flight.destination)
-      
-      // Get forecast for departure time
-      const departureTime = new Date(flight.departure_time)
-      const originForecast = await weatherAPI.getWeatherForecast(
-        weatherAPI.getAirportCoordinates(flight.origin).lat,
-        weatherAPI.getAirportCoordinates(flight.origin).lon,
-        departureTime
-      )
       
       // Combine weather data (weight destination more heavily for risk assessment)
       return {
@@ -515,7 +509,7 @@ export class HybridAIEngine {
     return importance
   }
 
-  private calculateFactors(features: MLFeatures, importance: Record<string, number>, aiPrediction: number): PredictionFactor[] {
+  private calculateFactors(features: MLFeatures, importance: Record<string, number>): PredictionFactor[] {
     const factors: PredictionFactor[] = []
 
     // Weather factor
@@ -702,7 +696,7 @@ export class HybridAIEngine {
     return predictedTime.toISOString()
   }
 
-  private generateRecommendations(features: MLFeatures, riskScore: number, factors: PredictionFactor[]): string[] {
+  private generateRecommendations(features: MLFeatures): string[] {
     const recommendations: string[] = []
 
     if (features.wind_risk > 0.7) {
@@ -723,12 +717,6 @@ export class HybridAIEngine {
     
     if (features.route_disruption_risk > 0.7) {
       recommendations.push('AI recommends: Consider alternative routes based on historical patterns')
-    }
-
-    if (riskScore >= 0.8) {
-      recommendations.unshift('🚨 CRITICAL: AI model suggests immediate action - consider flight cancellation')
-    } else if (riskScore >= 0.6) {
-      recommendations.unshift('⚠️ HIGH RISK: AI model strongly recommends proactive measures')
     }
 
     return recommendations.slice(0, 5)
@@ -758,7 +746,7 @@ export class HybridAIEngine {
     }
   }
 
-  async retrainModel(newTrainingData: any[]) {
+  async retrainModel(newTrainingData: MLFeatures[]) {
     if (!this.model) return
 
     console.log('Retraining AI model with new data...')

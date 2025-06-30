@@ -1,7 +1,55 @@
-import PredictiveAnalysisPanel from '@/components/PredictiveAnalysisPanel'
+'use client'
+
+import { useEffect, useState } from 'react'
 import { BarChart3, TrendingUp, AlertTriangle, Clock } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import type { DisruptionPrediction as BaseDisruptionPrediction } from '@/lib/hybrid-ai-engine'
+
+// Extend the type locally to allow optional origin/destination
+interface DisruptionPredictionWithRoute extends BaseDisruptionPrediction {
+  origin?: string;
+  destination?: string;
+}
 
 export default function PredictionsPage() {
+  const router = useRouter();
+  const [predictions, setPredictions] = useState<DisruptionPredictionWithRoute[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPredictions = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch('/api/predictions');
+        if (!response.ok) throw new Error('Failed to fetch predictions');
+        const data = await response.json();
+        setPredictions(data.predictions || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPredictions();
+  }, []);
+
+  function getRiskLevelColor(riskLevel: string) {
+    switch (riskLevel) {
+      case 'critical':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'high':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'low':
+        return 'bg-green-100 text-green-800 border-green-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -18,7 +66,7 @@ export default function PredictionsPage() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition" onClick={() => router.push('/dashboard/predictions?filter=all')}>
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg">
                 <BarChart3 className="h-6 w-6 text-blue-600" />
@@ -30,7 +78,7 @@ export default function PredictionsPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition" onClick={() => router.push('/dashboard/predictions?filter=high')}>
             <div className="flex items-center">
               <div className="p-2 bg-red-100 rounded-lg">
                 <AlertTriangle className="h-6 w-6 text-red-600" />
@@ -42,7 +90,7 @@ export default function PredictionsPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition" onClick={() => router.push('/dashboard/predictions?filter=medium')}>
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-lg">
                 <Clock className="h-6 w-6 text-yellow-600" />
@@ -54,7 +102,7 @@ export default function PredictionsPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition" onClick={() => router.push('/dashboard/predictions?filter=accuracy')}>
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-green-600" />
@@ -69,9 +117,60 @@ export default function PredictionsPage() {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Predictive Analysis Panel */}
+          {/* Predictive Analysis Table */}
           <div className="lg:col-span-2">
-            <PredictiveAnalysisPanel showAllFlights={true} />
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-medium text-gray-900 mb-4">All Flights Predictive Analysis</h2>
+              {loading ? (
+                <div className="text-center py-8 text-gray-500">Loading predictions...</div>
+              ) : error ? (
+                <div className="text-center py-8 text-red-500">{error}</div>
+              ) : predictions.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">No predictions available.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flight</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Level</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Score</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Disruption Type</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Model Confidence</th>
+                        <th className="px-4 py-2"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {predictions.map((prediction) => (
+                        <tr key={prediction.flight_id}>
+                          <td className="px-4 py-2 whitespace-nowrap font-medium text-gray-900">
+                            {prediction.origin && prediction.destination
+                              ? `Flight ${prediction.origin} to ${prediction.destination}`
+                              : `Flight ${prediction.flight_id.slice(0, 8)}`}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskLevelColor(prediction.risk_level)}`}>
+                              {prediction.risk_level.toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap">{(prediction.risk_score * 100).toFixed(1)}%</td>
+                          <td className="px-4 py-2 whitespace-nowrap">{prediction.predicted_disruption_type.toUpperCase()}</td>
+                          <td className="px-4 py-2 whitespace-nowrap">{prediction.model_confidence ? `${(prediction.model_confidence * 100).toFixed(0)}%` : '-'}</td>
+                          <td className="px-4 py-2 whitespace-nowrap">
+                            <button
+                              className="text-blue-600 hover:underline text-sm"
+                              onClick={() => router.push(`/dashboard/flights?flight_id=${prediction.flight_id}`)}
+                            >
+                              View Analysis
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Sidebar */}

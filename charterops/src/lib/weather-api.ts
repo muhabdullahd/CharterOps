@@ -94,37 +94,38 @@ export class WeatherAPI {
     }
   }
 
-  private parseWeatherData(apiData: any): WeatherData {
-    const main = apiData.main || {}
-    const wind = apiData.wind || {}
-    const weather = apiData.weather?.[0] || {}
-    const rain = apiData.rain || {}
+  private parseWeatherData(apiData: Record<string, unknown>): WeatherData {
+    const main = apiData.main as Record<string, unknown> || {}
+    const wind = apiData.wind as Record<string, unknown> || {}
+    const weather = Array.isArray(apiData.weather) ? (apiData.weather[0] as Record<string, unknown>) : {}
+    const rain = apiData.rain as Record<string, unknown> || {}
     
     // Calculate turbulence based on wind speed and weather conditions
-    const windSpeed = wind.speed || 0
-    const turbulence = this.calculateTurbulence(windSpeed, weather.main)
+    const windSpeed = typeof wind.speed === 'number' ? wind.speed : 0
+    const turbulence = this.calculateTurbulence(windSpeed, typeof weather.main === 'string' ? weather.main : 'Clear')
     
     return {
-      temperature: main.temp || 20,
+      temperature: typeof main.temp === 'number' ? main.temp : 20,
       wind_speed: windSpeed,
-      visibility: (apiData.visibility || 10000) / 1000, // Convert to km
-      precipitation: rain['1h'] || 0,
+      visibility: typeof apiData.visibility === 'number' ? apiData.visibility / 1000 : 10,
+      precipitation: typeof rain['1h'] === 'number' ? rain['1h'] : 0,
       turbulence: turbulence,
-      humidity: main.humidity || 50,
-      pressure: main.pressure || 1013,
-      conditions: weather.main || 'Clear'
+      humidity: typeof main.humidity === 'number' ? main.humidity : 50,
+      pressure: typeof main.pressure === 'number' ? main.pressure : 1013,
+      conditions: typeof weather.main === 'string' ? weather.main : 'Clear'
     }
   }
 
-  private parseForecastData(apiData: any, targetTime: Date): WeatherData {
-    const list = apiData.list || []
+  private parseForecastData(apiData: Record<string, unknown>, targetTime: Date): WeatherData {
+    const list = Array.isArray(apiData.list) ? apiData.list as Record<string, unknown>[] : []
     
     // Find the forecast closest to the target time
     const targetTimestamp = targetTime.getTime() / 1000
-    let closestForecast = list[0]
-    let minDiff = Math.abs(closestForecast.dt - targetTimestamp)
+    let closestForecast = list[0] || {}
+    let minDiff = typeof closestForecast.dt === 'number' ? Math.abs(closestForecast.dt - targetTimestamp) : Number.MAX_VALUE
     
     for (const forecast of list) {
+      if (typeof forecast.dt !== 'number') continue
       const diff = Math.abs(forecast.dt - targetTimestamp)
       if (diff < minDiff) {
         minDiff = diff

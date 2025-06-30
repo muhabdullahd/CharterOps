@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { Flight, Alert, Crew } from './supabase'
+import { Flight } from './supabase'
 
 export interface DisruptionPrediction {
   flight_id: string

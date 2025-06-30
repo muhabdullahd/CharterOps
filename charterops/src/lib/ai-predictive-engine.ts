@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { Flight, Alert, Crew } from './supabase'
+import { Flight } from './supabase'
 
 export interface DisruptionPrediction {
   flight_id: string
@@ -63,7 +63,7 @@ export interface MLFeatures {
 
 export class AIPredictiveEngine {
   private static instance: AIPredictiveEngine
-  private model: any = null
+  private model: { predict: (features: number[]) => number; getFeatureImportance: () => Record<string, number> } | null = null
   private isModelLoaded = false
 
   static getInstance(): AIPredictiveEngine {
@@ -168,10 +168,10 @@ export class AIPredictiveEngine {
       
       // Get AI prediction
       const featureArray = this.featuresToArray(features)
-      const aiRiskScore = this.model.predict(featureArray)
+      const aiRiskScore = this.model ? this.model.predict(featureArray) : 0;
       
       // Get feature importance for explainability
-      const featureImportance = this.model.getFeatureImportance()
+      const featureImportance = this.model ? this.model.getFeatureImportance() : {};
       
       // Calculate individual factor scores using AI insights
       const factors = await this.calculateAIFactors(features, aiRiskScore, featureImportance)
@@ -188,7 +188,7 @@ export class AIPredictiveEngine {
         confidence: confidence,
         factors: factors,
         predicted_time: this.predictDisruptionTime(flight, aiRiskScore),
-        recommended_actions: this.generateAIRecommendations(features, aiRiskScore, factors),
+        recommended_actions: this.generateAIRecommendations(features, aiRiskScore),
         ai_model_version: 'v1.0.0',
         feature_importance: featureImportance
       }
@@ -577,7 +577,7 @@ export class AIPredictiveEngine {
     return predictedTime.toISOString()
   }
 
-  private generateAIRecommendations(features: MLFeatures, riskScore: number, factors: PredictionFactor[]): string[] {
+  private generateAIRecommendations(features: MLFeatures, riskScore: number): string[] {
     const recommendations: string[] = []
 
     // AI-generated recommendations based on feature analysis

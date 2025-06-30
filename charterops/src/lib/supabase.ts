@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import type { PredictionFactor } from './ai-predictive-engine'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -86,7 +87,7 @@ export interface Prediction {
   risk_level: 'low' | 'medium' | 'high' | 'critical'
   predicted_disruption_type: 'weather' | 'crew' | 'mechanical' | 'airport'
   confidence: number
-  factors: any
+  factors: PredictionFactor[]
   predicted_time: string
   recommended_actions: string[]
   created_at: string

@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react'
 import { WeatherAPI } from '@/lib/weather-api'
 import { getWeatherSourceInfo } from '@/lib/weather-config'
+import type { WeatherData } from '@/lib/weather-api'
 
 export default function TestWeatherPage() {
-  const [weatherData, setWeatherData] = useState<any>(null)
+  const [weatherData, setWeatherData] = useState<{ lax: WeatherData, jfk: WeatherData, forecast: WeatherData } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [testResults, setTestResults] = useState<any[]>([])
+  const [testResults, setTestResults] = useState<{ test: string; status: string; details: string }[]>([])
 
   const weatherSourceInfo = getWeatherSourceInfo()
 

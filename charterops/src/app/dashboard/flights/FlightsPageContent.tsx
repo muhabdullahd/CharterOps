@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { supabase, Flight } from "@/lib/supabase";
+import { supabase, Flight, Alert } from "@/lib/supabase";
 import FlightCard from "@/components/FlightCard";
 import { CheckCircle, AlertTriangle, Users, ClipboardList } from "lucide-react";
 import PredictiveAnalysisPanel from '@/components/PredictiveAnalysisPanel'
@@ -55,14 +53,14 @@ export default function FlightsPageContent() {
       return <div className="text-red-500">Invalid flight details data.</div>;
     }
     const { flight, alerts, crewCompliance, backupPlans } = flightDetails as {
-      flight: any;
-      alerts: unknown[];
+      flight: Flight;
+      alerts: Alert[];
       crewCompliance: unknown[];
       backupPlans: unknown[];
     };
     // Filter alerts for this flight only
     const flightAlerts = Array.isArray(alerts)
-      ? alerts.filter((a: any) => a && a.flight_id === flight.id)
+      ? alerts.filter((a: Alert) => a && a.flight_id === flight.id)
       : [];
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -102,10 +100,10 @@ export default function FlightsPageContent() {
                   <strong>Flight ID:</strong> {flight.id}
                 </div>
                 <div className="text-sm text-gray-600 mb-1">
-                  <strong>Aircraft:</strong> {flight.aircraft_id || "N/A"}
+                  <strong>Aircraft:</strong> {typeof (flight as { aircraft_id?: string }).aircraft_id === 'string' ? (flight as { aircraft_id?: string }).aircraft_id : "N/A"}
                 </div>
                 <div className="text-sm text-gray-600 mb-1">
-                  <strong>Notes:</strong> {flight.notes || "-"}
+                  <strong>Notes:</strong> {typeof (flight as { notes?: string }).notes === 'string' ? (flight as { notes?: string }).notes : "-"}
                 </div>
               </div>
             </div>
@@ -126,16 +124,15 @@ export default function FlightsPageContent() {
               <div className="text-gray-500">No alerts for this flight.</div>
             ) : (
               <ul className="space-y-2">
-                {flightAlerts.map((alert: unknown) => {
+                {flightAlerts.map((alert: Alert) => {
                   if (typeof alert !== 'object' || alert === null) return null;
-                  const a = alert as { id: string; type: string; triggered_at: string; message: string };
                   return (
-                    <li key={a.id} className="border rounded p-3 bg-red-50">
+                    <li key={alert.id} className="border rounded p-3 bg-red-50">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-red-700">{a.type}</span>
-                        <span className="text-xs text-gray-500">{new Date(a.triggered_at).toLocaleString()}</span>
+                        <span className="font-medium text-red-700">{alert.type}</span>
+                        <span className="text-xs text-gray-500">{new Date(alert.triggered_at).toLocaleString()}</span>
                       </div>
-                      <div className="text-sm text-gray-700 mt-1">{a.message}</div>
+                      <div className="text-sm text-gray-700 mt-1">{alert.message}</div>
                     </li>
                   );
                 })}
