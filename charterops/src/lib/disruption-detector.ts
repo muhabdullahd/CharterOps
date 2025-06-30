@@ -1,4 +1,4 @@
-import { supabase, Flight, Crew, Alert } from './supabase'
+import { supabase, Flight, Crew } from './supabase'
 
 
 export interface WeatherData {
@@ -16,7 +16,7 @@ export interface DisruptionCheck {
   type: 'weather' | 'crew' | 'mechanical' | 'airport'
   severity: 'low' | 'medium' | 'high' | 'critical'
   message: string
-  details: any
+  details: unknown
 }
 
 export class DisruptionDetector {

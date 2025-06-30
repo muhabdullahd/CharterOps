@@ -295,9 +295,9 @@ export class DisruptionMonitor {
   async getFlightDisruptionDetails(flightId: string): Promise<{
     flight: Flight
     alerts: Alert[]
-    crewCompliance: any[]
-    backupPlans: any[]
-    suggestions: any[]
+    crewCompliance: unknown[]
+    backupPlans: unknown[]
+    suggestions: unknown[]
   } | null> {
     try {
       // Get flight

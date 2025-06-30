@@ -21,7 +21,6 @@ export default function Dashboard() {
   const [monitoringStatus, setMonitoringStatus] = useState<MonitoringStatus | null>(null)
   const [disruptionSummary, setDisruptionSummary] = useState<DisruptionSummary[]>([])
   const [isMonitoring, setIsMonitoring] = useState(false)
-  const [showCrewModal, setShowCrewModal] = useState(false)
   const [crew, setCrew] = useState<Crew[]>([])
   const router = useRouter()
 
