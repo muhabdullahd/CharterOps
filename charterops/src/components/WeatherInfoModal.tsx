@@ -35,70 +35,70 @@ export default function WeatherInfoModal({
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    const fetchWeatherData = async () => {
+      setLoading(true)
+      try {
+        // Simulate API call - in real implementation this would call AviationWeather.gov
+        const mockWeatherData: Record<string, WeatherData> = {
+          'KTEB': {
+            airport: 'KTEB',
+            visibility: 10,
+            ceiling: 2500,
+            wind_speed: 15,
+            wind_direction: 270,
+            temperature: 72,
+            conditions: ['VFR'],
+            timestamp: new Date().toISOString(),
+            metar: 'KTEB 151555Z 27015KT 10SM FEW025 22/12 A3001'
+          },
+          'KLAX': {
+            airport: 'KLAX',
+            visibility: 0.5,
+            ceiling: 200,
+            wind_speed: 8,
+            wind_direction: 180,
+            temperature: 68,
+            conditions: ['IFR', 'FOG'],
+            timestamp: new Date().toISOString(),
+            metar: 'KLAX 151555Z 18008KT 1/2SM FG OVC002 20/18 A2998'
+          },
+          'KJFK': {
+            airport: 'KJFK',
+            visibility: 8,
+            ceiling: 1500,
+            wind_speed: 22,
+            wind_direction: 320,
+            temperature: 75,
+            conditions: ['MVFR'],
+            timestamp: new Date().toISOString(),
+            metar: 'KJFK 151555Z 32022G30KT 8SM BKN015 24/15 A2995'
+          },
+          'KSFO': {
+            airport: 'KSFO',
+            visibility: 3,
+            ceiling: 800,
+            wind_speed: 12,
+            wind_direction: 240,
+            temperature: 65,
+            conditions: ['MVFR', 'MIST'],
+            timestamp: new Date().toISOString(),
+            metar: 'KSFO 151555Z 24012KT 3SM BR BKN008 18/16 A3002'
+          }
+        }
+
+        setWeatherData({
+          origin: mockWeatherData[origin] || null,
+          destination: mockWeatherData[destination] || null
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
     if (isOpen) {
       fetchWeatherData()
     }
   }, [isOpen, origin, destination])
-
-  const fetchWeatherData = async () => {
-    setLoading(true)
-    try {
-      // Simulate API call - in real implementation this would call AviationWeather.gov
-      const mockWeatherData: Record<string, WeatherData> = {
-        'KTEB': {
-          airport: 'KTEB',
-          visibility: 10,
-          ceiling: 2500,
-          wind_speed: 15,
-          wind_direction: 270,
-          temperature: 72,
-          conditions: ['VFR'],
-          timestamp: new Date().toISOString(),
-          metar: 'KTEB 151555Z 27015KT 10SM FEW025 22/12 A3001'
-        },
-        'KLAX': {
-          airport: 'KLAX',
-          visibility: 0.5,
-          ceiling: 200,
-          wind_speed: 8,
-          wind_direction: 180,
-          temperature: 68,
-          conditions: ['IFR', 'FOG'],
-          timestamp: new Date().toISOString(),
-          metar: 'KLAX 151555Z 18008KT 1/2SM FG OVC002 20/18 A2998'
-        },
-        'KJFK': {
-          airport: 'KJFK',
-          visibility: 8,
-          ceiling: 1500,
-          wind_speed: 22,
-          wind_direction: 320,
-          temperature: 75,
-          conditions: ['MVFR'],
-          timestamp: new Date().toISOString(),
-          metar: 'KJFK 151555Z 32022G30KT 8SM BKN015 24/15 A2995'
-        },
-        'KSFO': {
-          airport: 'KSFO',
-          visibility: 3,
-          ceiling: 800,
-          wind_speed: 12,
-          wind_direction: 240,
-          temperature: 65,
-          conditions: ['MVFR', 'MIST'],
-          timestamp: new Date().toISOString(),
-          metar: 'KSFO 151555Z 24012KT 3SM BR BKN008 18/16 A3002'
-        }
-      }
-
-      setWeatherData({
-        origin: mockWeatherData[origin] || null,
-        destination: mockWeatherData[destination] || null
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const getFlightCategory = (visibility: number, ceiling: number) => {
     if (visibility >= 5 && ceiling >= 3000) return { category: 'VFR', color: 'text-green-600', bg: 'bg-green-50' }

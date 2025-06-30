@@ -1,3 +1,6 @@
+// Force dynamic rendering to avoid prerendering issues with useSearchParams
+export const dynamic = 'force-dynamic'
+
 "use client"
 
 import { useEffect, useState } from 'react'
@@ -8,7 +11,12 @@ interface FlightDetails {
   flight: Flight
   alerts: Alert[]
   crew: Crew[]
-  disruptionDetails?: any
+  disruptionDetails?: {
+    crewCompliance?: Array<{
+      violations?: string[]
+    }>
+    backupPlans?: unknown[]
+  }
 }
 
 export default function FlightsPage() {
@@ -28,7 +36,7 @@ export default function FlightsPage() {
       setSelectedFlight(null)
       fetchFlights()
     }
-  }, [searchParams.get('flight_id')])
+  }, [searchParams])
 
   const fetchFlights = async () => {
     setLoading(true)
@@ -227,13 +235,13 @@ export default function FlightsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <h4 className="font-medium mb-2">Crew Compliance Issues</h4>
-                        {selectedFlight.disruptionDetails.crewCompliance?.length > 0 ? (
+                        {(selectedFlight.disruptionDetails.crewCompliance?.length ?? 0) > 0 ? (
                           <ul className="space-y-1">
-                            {selectedFlight.disruptionDetails.crewCompliance.map((compliance: any, index: number) => (
+                            {selectedFlight.disruptionDetails.crewCompliance?.map((compliance, index: number) => (
                               <li key={index} className="text-sm text-gray-700">
                                 {compliance.violations?.join(', ') || 'No violations'}
                               </li>
-                            ))}
+                            )) ?? []}
                           </ul>
                         ) : (
                           <p className="text-gray-500 text-sm">No compliance issues detected.</p>
@@ -241,8 +249,8 @@ export default function FlightsPage() {
                       </div>
                       <div>
                         <h4 className="font-medium mb-2">Backup Plans</h4>
-                        {selectedFlight.disruptionDetails.backupPlans?.length > 0 ? (
-                          <p className="text-sm text-gray-700">{selectedFlight.disruptionDetails.backupPlans.length} backup plans available</p>
+                        {(selectedFlight.disruptionDetails.backupPlans?.length ?? 0) > 0 ? (
+                          <p className="text-sm text-gray-700">{selectedFlight.disruptionDetails.backupPlans?.length} backup plans available</p>
                         ) : (
                           <p className="text-gray-500 text-sm">No backup plans available.</p>
                         )}
