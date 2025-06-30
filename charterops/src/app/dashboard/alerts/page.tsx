@@ -38,7 +38,6 @@ export default function AlertsPage() {
             <thead>
               <tr>
                 <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Alert Type</th>
-                <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Severity</th>
                 <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Message</th>
                 <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-700">Triggered At</th>
               </tr>
@@ -52,7 +51,6 @@ export default function AlertsPage() {
                 activeAlerts.map((alert: Alert) => (
                   <tr key={alert.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 border-b text-gray-900 font-medium">{alert.type}</td>
-                    <td className="px-6 py-4 border-b text-gray-700">{alert.severity}</td>
                     <td className="px-6 py-4 border-b text-gray-700">{alert.message}</td>
                     <td className="px-6 py-4 border-b text-gray-700">{new Date(alert.triggered_at).toLocaleString()}</td>
                   </tr>
