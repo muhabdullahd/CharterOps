@@ -6,7 +6,7 @@ import { supabase, Flight, Alert, Crew } from '@/lib/supabase'
 import FlightCard from '@/components/FlightCard'
 import AlertPanel from '@/components/AlertPanel'
 import CrewDutyTracker from '@/components/CrewDutyTracker'
-import { Plane, AlertTriangle, Users, Clock, Play, Square, RefreshCw, Activity } from 'lucide-react'
+import { Plane, AlertTriangle, Users, Clock, Play, Square, RefreshCw, Activity, TrendingUp } from 'lucide-react'
 import { DisruptionSummary, MonitoringStatus } from '@/lib/disruption-monitor'
 import { useRouter } from 'next/navigation'
 
@@ -279,7 +279,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           {/* Active Flights - navigates to flights page */}
           <div
             className="bg-white rounded-lg shadow p-6 cursor-pointer hover:bg-gray-100"
@@ -321,13 +321,26 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+          {/* Predictive Analysis - navigates to predictions page */}
+          <div
+            className="bg-white rounded-lg shadow p-6 cursor-pointer hover:bg-gray-100"
+            onClick={() => router.push('/dashboard/predictions')}
+          >
+            <div className="flex items-center">
+              <TrendingUp className="h-8 w-8 text-purple-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">AI Predictions</p>
+                <p className="text-2xl font-bold text-gray-900">24</p>
+              </div>
+            </div>
+          </div>
           {/* Avg Response - navigates to response stats page */}
           <div
             className="bg-white rounded-lg shadow p-6 cursor-pointer hover:bg-gray-100"
             onClick={() => router.push('/dashboard/response')}
           >
             <div className="flex items-center">
-              <Clock className="h-8 w-8 text-purple-600" />
+              <Clock className="h-8 w-8 text-indigo-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Avg Response</p>
                 <p className="text-2xl font-bold text-gray-900">2.3m</p>

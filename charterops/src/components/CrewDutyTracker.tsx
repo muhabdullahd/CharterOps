@@ -3,10 +3,13 @@
 import { useState, useEffect } from 'react'
 import { supabase, Crew } from '@/lib/supabase'
 import { Users, Clock, AlertTriangle, CheckCircle } from 'lucide-react'
+import CrewReplacementModal from './CrewReplacementModal'
 
 export default function CrewDutyTracker() {
   const [crew, setCrew] = useState<Crew[]>([])
   const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [selectedCrew, setSelectedCrew] = useState<Crew | null>(null)
 
   useEffect(() => {
     fetchCrew()
@@ -17,7 +20,6 @@ export default function CrewDutyTracker() {
       .from('crew')
       .select('*')
       .order('name')
-    
     if (data) {
       setCrew(data)
     }
@@ -33,6 +35,33 @@ export default function CrewDutyTracker() {
   const getDutyIcon = (dutyHours: number) => {
     if (dutyHours <= 8) return <CheckCircle className="h-4 w-4" />
     return <AlertTriangle className="h-4 w-4" />
+  }
+
+  // Only show yellow/red crew
+  const atRiskCrew = crew.filter(member => member.current_duty > 8)
+
+  const handleCardClick = (member: Crew) => {
+    setSelectedCrew(member)
+    setShowModal(true)
+  }
+
+  const handleReplace = async (atRiskCrewId: string, replacementCrewId: string) => {
+    // Remove at-risk crew from their flight
+    await supabase
+      .from('crew')
+      .update({ assigned_flight: null })
+      .eq('id', atRiskCrewId)
+    // Assign replacement crew to the same flight
+    const atRisk = crew.find(c => c.id === atRiskCrewId)
+    if (atRisk && atRisk.assigned_flight) {
+      await supabase
+        .from('crew')
+        .update({ assigned_flight: atRisk.assigned_flight })
+        .eq('id', replacementCrewId)
+    }
+    setShowModal(false)
+    setSelectedCrew(null)
+    fetchCrew()
   }
 
   if (loading) {
@@ -60,21 +89,24 @@ export default function CrewDutyTracker() {
           <Users className="h-5 w-5 text-gray-400" />
         </div>
       </div>
-      
       <div className="p-4">
-        {crew.length === 0 ? (
+        {atRiskCrew.length === 0 ? (
           <div className="text-center py-8">
             <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-sm">No crew data available</p>
+            <p className="text-gray-500 text-sm">No at-risk crew members</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {crew.map((member) => {
+            {atRiskCrew.map((member) => {
               const dutyStatus = getDutyStatus(member.current_duty)
               return (
                 <div
                   key={member.id}
-                  className={`border rounded-lg p-4 ${dutyStatus.bg}`}
+                  className={`border rounded-lg p-4 cursor-pointer hover:shadow-lg transition ${dutyStatus.bg}`}
+                  onClick={() => handleCardClick(member)}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Replace crew member ${member.name}`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -94,18 +126,15 @@ export default function CrewDutyTracker() {
                         </span>
                       </div>
                       <p className="text-xs text-gray-500">
-                        {dutyStatus.status === 'compliant' ? 'FAA Compliant' : 
-                         dutyStatus.status === 'warning' ? 'Approaching Limit' : 'Duty Violation'}
+                        {dutyStatus.status === 'warning' ? 'Approaching Limit' : 'Duty Violation'}
                       </p>
                     </div>
                   </div>
-                  
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <div className="flex items-center justify-between text-xs text-gray-600">
                       <span>Rest Compliant: {member.rest_compliant ? 'Yes' : 'No'}</span>
                       <span>Assigned: {member.assigned_flight ? 'Yes' : 'No'}</span>
                     </div>
-                    
                     {member.current_duty > 8 && (
                       <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded">
                         <p className="text-xs text-red-700">
@@ -119,15 +148,22 @@ export default function CrewDutyTracker() {
             })}
           </div>
         )}
-        
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="text-xs text-gray-500 space-y-1">
-            <p>• Green: FAA Compliant (≤8h)</p>
             <p>• Yellow: Warning (8-10h)</p>
             <p>• Red: Violation (&gt;10h)</p>
           </div>
         </div>
       </div>
+      {/* Replacement Modal */}
+      {showModal && selectedCrew && (
+        <CrewReplacementModal
+          atRiskCrew={selectedCrew}
+          isOpen={showModal}
+          onClose={() => { setShowModal(false); setSelectedCrew(null); }}
+          onReplace={handleReplace}
+        />
+      )}
     </div>
   )
 } 

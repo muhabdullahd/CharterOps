@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS public.duty_records (
 CREATE TABLE IF NOT EXISTS public.alerts (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     flight_id UUID REFERENCES public.flights(id) ON DELETE CASCADE NOT NULL,
-    type TEXT CHECK (type IN ('weather', 'crew', 'mechanical', 'airport')) NOT NULL,
+    type TEXT CHECK (type IN ('weather', 'crew', 'mechanical', 'airport', 'predictive')) NOT NULL,
     message TEXT NOT NULL,
     triggered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     resolved BOOLEAN DEFAULT false,
@@ -84,6 +84,33 @@ CREATE TABLE IF NOT EXISTS public.backups (
     priority INTEGER DEFAULT 1,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create predictions table for storing AI predictions
+CREATE TABLE IF NOT EXISTS public.predictions (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    flight_id UUID REFERENCES public.flights(id) ON DELETE CASCADE NOT NULL,
+    risk_score DECIMAL(3,2) NOT NULL,
+    risk_level TEXT CHECK (risk_level IN ('low', 'medium', 'high', 'critical')) NOT NULL,
+    predicted_disruption_type TEXT CHECK (predicted_disruption_type IN ('weather', 'crew', 'mechanical', 'airport')) NOT NULL,
+    confidence DECIMAL(3,2) NOT NULL,
+    factors JSONB NOT NULL,
+    predicted_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    recommended_actions TEXT[] NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create prediction_accuracy table for tracking prediction accuracy
+CREATE TABLE IF NOT EXISTS public.prediction_accuracy (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    prediction_id UUID REFERENCES public.predictions(id) ON DELETE CASCADE NOT NULL,
+    flight_id UUID REFERENCES public.flights(id) ON DELETE CASCADE NOT NULL,
+    was_accurate BOOLEAN NOT NULL,
+    actual_disruption_type TEXT CHECK (actual_disruption_type IN ('weather', 'crew', 'mechanical', 'airport', 'none')),
+    actual_disruption_time TIMESTAMP WITH TIME ZONE,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create indexes for better performance
@@ -183,6 +210,32 @@ CREATE POLICY "Authenticated users can insert backups" ON public.backups
 
 DROP POLICY IF EXISTS "Authenticated users can update backups" ON public.backups;
 CREATE POLICY "Authenticated users can update backups" ON public.backups
+    FOR UPDATE USING (auth.role() = 'authenticated');
+
+-- Predictions policies
+DROP POLICY IF EXISTS "Authenticated users can view predictions" ON public.predictions;
+CREATE POLICY "Authenticated users can view predictions" ON public.predictions
+    FOR SELECT USING (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Authenticated users can insert predictions" ON public.predictions;
+CREATE POLICY "Authenticated users can insert predictions" ON public.predictions
+    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Authenticated users can update predictions" ON public.predictions;
+CREATE POLICY "Authenticated users can update predictions" ON public.predictions
+    FOR UPDATE USING (auth.role() = 'authenticated');
+
+-- Prediction accuracy policies
+DROP POLICY IF EXISTS "Authenticated users can view prediction accuracy" ON public.prediction_accuracy;
+CREATE POLICY "Authenticated users can view prediction accuracy" ON public.prediction_accuracy
+    FOR SELECT USING (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Authenticated users can insert prediction accuracy" ON public.prediction_accuracy;
+CREATE POLICY "Authenticated users can insert prediction accuracy" ON public.prediction_accuracy
+    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Authenticated users can update prediction accuracy" ON public.prediction_accuracy;
+CREATE POLICY "Authenticated users can update prediction accuracy" ON public.prediction_accuracy
     FOR UPDATE USING (auth.role() = 'authenticated');
 
 -- Create function to handle user creation

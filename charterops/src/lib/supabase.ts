@@ -50,7 +50,7 @@ export interface Crew {
 export interface Alert {
   id: string
   flight_id: string
-  type: 'weather' | 'crew' | 'mechanical' | 'airport'
+  type: 'weather' | 'crew' | 'mechanical' | 'airport' | 'predictive'
   message: string
   triggered_at: string
   resolved: boolean
@@ -77,4 +77,29 @@ export interface Backup {
   priority?: number
   created_at: string
   updated_at: string
+}
+
+export interface Prediction {
+  id: string
+  flight_id: string
+  risk_score: number
+  risk_level: 'low' | 'medium' | 'high' | 'critical'
+  predicted_disruption_type: 'weather' | 'crew' | 'mechanical' | 'airport'
+  confidence: number
+  factors: any
+  predicted_time: string
+  recommended_actions: string[]
+  created_at: string
+  updated_at: string
+}
+
+export interface PredictionAccuracy {
+  id: string
+  prediction_id: string
+  flight_id: string
+  was_accurate: boolean
+  actual_disruption_type: 'weather' | 'crew' | 'mechanical' | 'airport' | 'none'
+  actual_disruption_time: string | null
+  notes: string | null
+  created_at: string
 } 

@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase, Flight } from "@/lib/supabase";
 import FlightCard from "@/components/FlightCard";
 import { CheckCircle, AlertTriangle, Users, ClipboardList } from "lucide-react";
+import PredictiveAnalysisPanel from '@/components/PredictiveAnalysisPanel'
 
 export default function FlightsPageContent() {
   const [flights, setFlights] = useState<Flight[]>([]);
@@ -59,6 +60,10 @@ export default function FlightsPageContent() {
       crewCompliance: unknown[];
       backupPlans: unknown[];
     };
+    // Filter alerts for this flight only
+    const flightAlerts = Array.isArray(alerts)
+      ? alerts.filter((a: any) => a && a.flight_id === flight.id)
+      : [];
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-3xl mx-auto">
@@ -106,17 +111,22 @@ export default function FlightsPageContent() {
             </div>
           </div>
 
+          {/* AI Predictive Analysis for this flight */}
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <PredictiveAnalysisPanel flightId={flight.id} />
+          </div>
+
           {/* Alerts */}
           <div className="bg-white rounded-lg shadow p-6 mb-6">
             <div className="flex items-center mb-3">
               <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
               <h3 className="text-lg font-semibold text-gray-900">Alerts</h3>
             </div>
-            {alerts.length === 0 ? (
+            {flightAlerts.length === 0 ? (
               <div className="text-gray-500">No alerts for this flight.</div>
             ) : (
               <ul className="space-y-2">
-                {alerts.map((alert: unknown) => {
+                {flightAlerts.map((alert: unknown) => {
                   if (typeof alert !== 'object' || alert === null) return null;
                   const a = alert as { id: string; type: string; triggered_at: string; message: string };
                   return (
